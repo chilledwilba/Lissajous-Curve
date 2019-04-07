@@ -6,7 +6,7 @@ using UnityEngine.SceneManagement;
 public class LissajousCurveController : MonoBehaviour
 {
     public Dictionary<string, Field> Map { get; set; } = new Dictionary<string, Field>();
-    
+
     public UIFieldInt GridSize = new UIFieldInt("gridSize", 1, 50, 10);
     public FieldFloat TimeScale = new FieldFloat("timeScale", 0, 1, 0.5f);
     public FieldVector2 Position = new FieldVector2("position", -10, 10, new Vector2(2.5f, -2.5f));
@@ -118,7 +118,7 @@ public class LissajousCurveController : MonoBehaviour
         else if (Input.GetKeyDown(KeyCode.Space)) ResetTrails();
         else if (Input.GetKeyDown(KeyCode.LeftArrow)) GridSize.value = (int)Tools.ClampValues(GridSize.value - 1, GridSize.min, GridSize.max);
         else if (Input.GetKeyDown(KeyCode.RightArrow)) GridSize.value = (int)Tools.ClampValues(GridSize.value + 1, GridSize.min, GridSize.max);
-
+        else if (Input.GetKeyDown(KeyCode.Escape)) Application.Quit();
         // Update Positions
         UpdateAxisPositions();
         UpdateDerivedPositions();
@@ -341,5 +341,10 @@ public class LissajousCurveController : MonoBehaviour
                 derivedShapesMatrixTrailRenderers[i, y].Clear();
             }
         }
+    }
+
+    public void CloseApplication()
+    {
+        Application.Quit();
     }
 }
