@@ -22,6 +22,7 @@ Coding Challenge #116: Lissajous Curve Table - [Coding Train](https://youtu.be/-
   <tr><td>Space Key</td><td>Clear Trail</td></tr>
   <tr><td>Left Arrow Key</td><td>Decrease Grid Size</td></tr>
   <tr><td>Right Arrow Key</td><td>Increase Grid Size</td></tr>
+  <tr><td>Esc Key</td><td>Close Application</td></tr>
 </table>
 
 #### Examples
