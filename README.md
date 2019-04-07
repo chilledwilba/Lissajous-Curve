@@ -1,5 +1,4 @@
 # Lissajous Curve
-A fun play area for testing Lissajous Patterns! Created using Unity Engine
 A simple project showing off the Lissajous Curve.<br>
 Play with the sliders and see what patterns you can create.
 
