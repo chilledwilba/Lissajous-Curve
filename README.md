@@ -17,9 +17,12 @@ Making a physical Lissajous curve - [standupmaths](https://youtu.be/4CbPksEl51Q)
 Coding Challenge #116: Lissajous Curve Table - [Coding Train](https://youtu.be/--6eyLO78CY)
 
 #### Input
-Enter - Reset<br>
-Space - Reset Trails<br>
-Arrow Keys - Resize Grid
+<table>
+  <tr><td>Enter Key</td><td>Reload</td></tr>
+  <tr><td>Space Key</td><td>Clear Trail</td></tr>
+  <tr><td>Left Arrow Key</td><td>Decrease Grid Size</td></tr>
+  <tr><td>Right Arrow Key</td><td>Increase Grid Size</td></tr>
+</table>
 
 #### Examples
 Resize Grid            |  Grid Lines
