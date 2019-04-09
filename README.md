@@ -7,6 +7,7 @@ Built using Unity Version 2018.3.11f1
 |     |     |
 :-------------------------:|:-------------------------:
 ![](Pics/Normal.gif)  |  ![](Pics/90-Degrees.gif)
+![](Pics/45-Degrees-Multiplier-x2.gif)  |  ![](Pics/90-Degrees-Multiplier-x2.gif)
 
 #### Download Build
 Windows Build - [Download]()<br>
