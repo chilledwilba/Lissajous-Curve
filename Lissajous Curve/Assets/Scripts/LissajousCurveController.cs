@@ -12,9 +12,10 @@ public class LissajousCurveController : MonoBehaviour
     public FieldVector2 Position = new FieldVector2("position", -10, 10, new Vector2(2.5f, -2.5f));
     public FieldVector2 Angle = new FieldVector2("angle", 0, 360, new Vector2(0, 0));
     public FieldVector2 Radius = new FieldVector2("radius", 0, 5, new Vector2(1, 1));
-    public FieldVector2 PointSize = new FieldVector2("pointSize", 0, 2, new Vector2(0.5f, 0.75f));
-    public FieldFloat TrailLength = new FieldFloat("trailLength", 0, 10, 7);
+    public FieldVector2 DotSize = new FieldVector2("dotSize", 0, 2, new Vector2(0.5f, 0.25f));
+    public FieldFloat TrailLength = new FieldFloat("trailLength", 0, 50, 10);
     public FieldVector2 TrailWidth = new FieldVector2("trailWidth", 0, 2, new Vector2(0.075f, 0.05f));
+    public FieldVector2 AxisMultiplier = new FieldVector2("axisMultiplier", 0, 10, new Vector2(1, 1));
 
     [Header("Trail Colors")]
     public bool updateGradient = false;
@@ -26,13 +27,13 @@ public class LissajousCurveController : MonoBehaviour
 
     [Header("Prefabs")]
     public Transform AxisPrefab;
-    public Transform DerivedShapePrefab;
+    public Transform GridPrefab;
 
     // Lists
     Transform[,] axis;
     TrailRenderer[,] axisTrailRenderers;
-    Transform[,] derivedShapesMatrix;
-    TrailRenderer[,] derivedShapesMatrixTrailRenderers;
+    Transform[,] grid;
+    TrailRenderer[,] gridTrailRenderers;
 
     // Circle Angle
     float angle = 0;
@@ -54,56 +55,65 @@ public class LissajousCurveController : MonoBehaviour
         Map.Add(Position.key, Position);
         Map.Add(Angle.key, Angle);
         Map.Add(Radius.key, Radius);
-        Map.Add(PointSize.key, PointSize);
+        Map.Add(DotSize.key, DotSize);
         Map.Add(TrailLength.key, TrailLength);
         Map.Add(TrailWidth.key, TrailWidth);
+        Map.Add(AxisMultiplier.key, AxisMultiplier);
 
         // Initialise Arrays
         axis = new Transform[2, GridSize.max];
         axisTrailRenderers = new TrailRenderer[2, GridSize.max];
-        derivedShapesMatrix = new Transform[GridSize.max, GridSize.max];
-        derivedShapesMatrixTrailRenderers = new TrailRenderer[GridSize.max, GridSize.max];
+        grid = new Transform[GridSize.max, GridSize.max];
+        gridTrailRenderers = new TrailRenderer[GridSize.max, GridSize.max];
 
-        LoadAxisShapes();
-        LoadDerivedShapes();
+        LoadAxis();
+        LoadGrid();
     }
 
-    void LoadAxisShapes()
+    void LoadAxis()
     {
+        Transform shape;
+
         // X Axis
         Transform parent = new GameObject("X Axis").transform;
-        GenerateList(AxisPrefab, parent, "X", Vector3.zero, 0, axis, axisTrailRenderers);
+        for (int i = 0; i < GridSize.max; i++)
+        {
+            shape = Instantiate(AxisPrefab, parent);
+            shape.name = string.Format("{0}{1}", "X", i);
+            shape.gameObject.SetActive(false);
+            axis[0, i] = shape;
+            axisTrailRenderers[0, i] = shape.GetComponent<TrailRenderer>();
+        }
 
         // Y Axis
         parent = new GameObject("Y Axis").transform;
-        GenerateList(AxisPrefab, parent, "Y", Vector3.zero, 1, axis, axisTrailRenderers);
-    }
-
-    void LoadDerivedShapes()
-    {
-        Transform parent = new GameObject("Derived Shapes").transform;
-        string name;
-        int arrayIndex;
-
         for (int i = 0; i < GridSize.max; i++)
         {
-            name = string.Format("X{0}Y", i);
-            arrayIndex = i;
-            GenerateList(DerivedShapePrefab, parent, name, Vector3.zero, arrayIndex, derivedShapesMatrix, derivedShapesMatrixTrailRenderers);
+            shape = Instantiate(AxisPrefab, parent);
+            shape.name = string.Format("{0}{1}", "Y", i);
+            shape.gameObject.SetActive(false);
+            axis[1, i] = shape;
+            axisTrailRenderers[1, i] = shape.GetComponent<TrailRenderer>();
         }
     }
 
-    void GenerateList(Transform prefab, Transform parent, string name, Vector3 rotation, int arrayIndex, Transform[,] shapeList, TrailRenderer[,] trailRendererList)
+    void LoadGrid()
     {
         Transform shape;
-        for (int i = 0; i < GridSize.max; i++)
+        Transform parent = new GameObject("Grid").transform;
+        string name;
+
+        for (int x = 0; x < GridSize.max; x++)
         {
-            shape = Instantiate(prefab, parent);
-            shape.name = string.Format("{0}{1}", name, i);
-            shape.gameObject.SetActive(false);
-            shape.rotation = Quaternion.Euler(rotation);
-            shapeList[arrayIndex, i] = shape;
-            if (trailRendererList != null) trailRendererList[arrayIndex, i] = shape.GetComponent<TrailRenderer>();
+            name = string.Format("X{0}Y", x);
+            for (int y = 0; y < GridSize.max; y++)
+            {
+                shape = Instantiate(GridPrefab, parent);
+                shape.name = string.Format("{0}{1}", name, y);
+                shape.gameObject.SetActive(false);
+                grid[x, y] = shape;
+                gridTrailRenderers[x, y] = shape.GetComponent<TrailRenderer>();
+            }
         }
     }
     #endregion
@@ -114,14 +124,16 @@ public class LissajousCurveController : MonoBehaviour
         Time.timeScale = TimeScale.value;
 
         // Key Inputs
-        if (Input.GetKeyDown(KeyCode.Return)) SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        if (Input.GetKeyDown(KeyCode.Return)) Reload();
         else if (Input.GetKeyDown(KeyCode.Space)) ResetTrails();
-        else if (Input.GetKeyDown(KeyCode.LeftArrow)) GridSize.value = (int)Tools.ClampValues(GridSize.value - 1, GridSize.min, GridSize.max);
-        else if (Input.GetKeyDown(KeyCode.RightArrow)) GridSize.value = (int)Tools.ClampValues(GridSize.value + 1, GridSize.min, GridSize.max);
-        else if (Input.GetKeyDown(KeyCode.Escape)) Application.Quit();
+        else if (Input.GetKeyDown(KeyCode.DownArrow)) GridSize.value = (int)Tools.ClampValues(GridSize.value - 1, GridSize.min, GridSize.max);
+        else if (Input.GetKeyDown(KeyCode.UpArrow)) GridSize.value = (int)Tools.ClampValues(GridSize.value + 1, GridSize.min, GridSize.max);
+        else if (Input.GetKeyDown(KeyCode.Escape)) CloseApplication();
+        else if (Input.GetKeyDown(KeyCode.F)) SwitchFullScreen();
+
         // Update Positions
         UpdateAxisPositions();
-        UpdateDerivedPositions();
+        UpdateGridPositions();
         gridLineController.UpdatePositions(axis);
     }
 
@@ -132,7 +144,7 @@ public class LissajousCurveController : MonoBehaviour
         else if (GridSize.value < _currentGridSize) UpdateGridSize(GridSize.value, _currentGridSize, false);
 
         // State Change
-        if (_pointSize != PointSize.value) UpdatePointSize();
+        if (_pointSize != DotSize.value) UpdateDotSize();
         if (_trailLength != TrailLength.value) UpdateTrailLength();
         if (_trailWidth != TrailWidth.value) UpdateTrailWidth();
         if (updateGradient && !Tools.CompareGradient(_gradient, gradient)) UpdateTrailColors();
@@ -145,29 +157,26 @@ public class LissajousCurveController : MonoBehaviour
         for (int i = 0; i < GridSize.value; i++)
         {
             Vector2 centre = new Vector2(Position.value.x * i, -Position.value.y);
-            SetAxisPosition(axis[0, i], centre, Radius.value.x, Angle.value.x, i);
+            axis[0, i].position = centre + GetCirclePosition(Angle.value.x, i, AxisMultiplier.value.x) * Radius.value.x;
 
             centre = new Vector2(-Position.value.x, Position.value.y * i);
-            SetAxisPosition(axis[1, i], centre, Radius.value.y, Angle.value.y, i);
+            axis[1, i].position = centre + GetCirclePosition(Angle.value.y, i, AxisMultiplier.value.y) * Radius.value.y;
         }
     }
 
-    void SetAxisPosition(Transform shape, Vector2 centre, float radius, float angleOffset, int index)
+    Vector2 GetCirclePosition(float angleOffset, int i, float multiplier)
     {
-        float newAngle = angle * (index + 1);
-        float offset = angleOffset * Mathf.Deg2Rad;
-        newAngle += offset;
-        Vector2 circlePosition = new Vector2(Mathf.Sin(newAngle), Mathf.Cos(newAngle)) * radius;
-        shape.position = centre + circlePosition;
+        float newAngle = angle * ((i + 1) * multiplier) + (angleOffset * Mathf.Deg2Rad);
+        return new Vector2(Mathf.Sin(newAngle), Mathf.Cos(newAngle));
     }
 
-    void UpdateDerivedPositions()
+    void UpdateGridPositions()
     {
         for (int x = 0; x < GridSize.value; x++)
         {
             for (int y = 0; y < GridSize.value; y++)
             {
-                derivedShapesMatrix[x, y].position = new Vector2(axis[0, x].position.x, axis[1, y].position.y);
+                grid[x, y].position = new Vector2(axis[0, x].position.x, axis[1, y].position.y);
             }
         }
     }
@@ -180,10 +189,10 @@ public class LissajousCurveController : MonoBehaviour
         AxisSetActive(a, b, state);
 
         // Set State - Shapes in alive columns
-        DerivedShapesMatrixSetActive(0, a, a, b, state);
+        GridSetActive(0, a, a, b, state);
 
         // Set State - Entire Columns
-        DerivedShapesMatrixSetActive(a, b, 0, b, state);
+        GridSetActive(a, b, 0, b, state);
 
         // Set State - Grid Lines
         gridLineController.ResizeAxis(a, b, state);
@@ -203,13 +212,13 @@ public class LissajousCurveController : MonoBehaviour
         }
     }
 
-    void DerivedShapesMatrixSetActive(int xs, int xe, int ys, int ye, bool state)
+    void GridSetActive(int xs, int xe, int ys, int ye, bool state)
     {
         for (int x = xs; x < xe; x++)
         {
             for (int y = ys; y < ye; y++)
             {
-                derivedShapesMatrix[x, y].gameObject.SetActive(state);
+                grid[x, y].gameObject.SetActive(state);
             }
         }
     }
@@ -229,10 +238,10 @@ public class LissajousCurveController : MonoBehaviour
         cam.transform.position = new Vector3(x, y, -10);
     }
 
-    void UpdatePointSize()
+    void UpdateDotSize()
     {
-        Vector3 scalex = Vector3.one * PointSize.value.x;
-        Vector3 scaley = Vector3.one * PointSize.value.y;
+        Vector3 scalex = Vector3.one * DotSize.value.x;
+        Vector3 scaley = Vector3.one * DotSize.value.y;
 
         for (int x = 0; x < GridSize.max; x++)
         {
@@ -241,12 +250,13 @@ public class LissajousCurveController : MonoBehaviour
 
             for (int y = 0; y < GridSize.max; y++)
             {
-                derivedShapesMatrix[x, y].localScale = scaley;
+                grid[x, y].localScale = scaley;
             }
         }
-        _pointSize = PointSize.value;
+        _pointSize = DotSize.value;
     }
 
+    #region Trail Renderer
     void UpdateTrailLength()
     {
         for (int i = 0; i < GridSize.max; i++)
@@ -256,7 +266,7 @@ public class LissajousCurveController : MonoBehaviour
 
             for (int y = 0; y < GridSize.max; y++)
             {
-                derivedShapesMatrixTrailRenderers[i, y].time = TrailLength.value;
+                gridTrailRenderers[i, y].time = TrailLength.value;
             }
         }
         _trailLength = TrailLength.value;
@@ -271,7 +281,7 @@ public class LissajousCurveController : MonoBehaviour
 
             for (int y = 0; y < GridSize.max; y++)
             {
-                derivedShapesMatrixTrailRenderers[i, y].widthMultiplier = TrailWidth.value.y;
+                gridTrailRenderers[i, y].widthMultiplier = TrailWidth.value.y;
             }
         }
         _trailWidth = TrailWidth.value;
@@ -294,8 +304,8 @@ public class LissajousCurveController : MonoBehaviour
             tr = axisTrailRenderers[1, x];
             tr.startColor = tr.endColor = trailColor;
 
-            // Set Verticle Derived Colors
-            tr = derivedShapesMatrixTrailRenderers[x, x];
+            // Set Verticle Grid Colors
+            tr = gridTrailRenderers[x, x];
             tr.startColor = tr.endColor = trailColor;
 
             for (int y = x + 1; y < GridSize.value; y++)
@@ -304,10 +314,10 @@ public class LissajousCurveController : MonoBehaviour
                 yColor = gradient.Evaluate(gradientStep * y);
                 trailColor = (xColor + yColor) / 2;
 
-                tr = derivedShapesMatrixTrailRenderers[x, y];
+                tr = gridTrailRenderers[x, y];
                 tr.startColor = tr.endColor = trailColor;
 
-                tr = derivedShapesMatrixTrailRenderers[y, x];
+                tr = gridTrailRenderers[y, x];
                 tr.startColor = tr.endColor = trailColor;
             }
         }
@@ -315,6 +325,7 @@ public class LissajousCurveController : MonoBehaviour
         _gradient.colorKeys = gradient.colorKeys;
         _gradient.alphaKeys = gradient.alphaKeys;
     }
+    #endregion
 
     void PositionChanged()
     {
@@ -329,6 +340,17 @@ public class LissajousCurveController : MonoBehaviour
         _position = Position.value;
     }
 
+    #region Buttons
+    public void SwitchFullScreen()
+    {
+        Screen.fullScreen = !Screen.fullScreen;
+    }
+
+    public void Reload()
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+    }
+
     public void ResetTrails()
     {
         for (int i = 0; i < GridSize.value; i++)
@@ -338,7 +360,7 @@ public class LissajousCurveController : MonoBehaviour
 
             for (int y = 0; y < GridSize.value; y++)
             {
-                derivedShapesMatrixTrailRenderers[i, y].Clear();
+                gridTrailRenderers[i, y].Clear();
             }
         }
     }
@@ -347,4 +369,5 @@ public class LissajousCurveController : MonoBehaviour
     {
         Application.Quit();
     }
+    #endregion
 }
