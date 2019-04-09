@@ -10,7 +10,7 @@ Built using Unity Version 2018.3.11f1
 ![](Pics/45-Degrees-Multiplier-x2.gif)  |  ![](Pics/90-Degrees-Multiplier-x2.gif)
 
 #### Download Build
-Windows Build - [Download]()<br>
+Windows Build - [Download](https://github.com/chilledwilba/Lissajous-Curve/releases/download/v1.0/Lissajous-Curve-Windows-V1.zip)<br>
 macOS Build - [Download]()
 
 #### Inspiration
