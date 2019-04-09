@@ -6,7 +6,7 @@ Built using Unity Version 2018.3.11f1
 
 |     |     |
 :-------------------------:|:-------------------------:
-![](Gifs/Gif1.gif)  |  ![](Gifs/Gif3.gif)
+![](Pics/Normal.gif)  |  ![](Pics/90-Degrees.gif)
 
 #### Download Build
 Windows Build - [Download]()<br>
@@ -29,4 +29,6 @@ Coding Challenge #116: Lissajous Curve Table - [Coding Train](https://youtu.be/-
 #### Examples
 Resize Grid            |  Grid Lines
 :-------------------------:|:-------------------------:
-![](Gifs/Gif2.gif)  |  ![](Gifs/Gif4.gif) 
+![](Pics/Resize-Grid.gif)  |  ![](Pics/Grid-Lines.gif) 
+UI          |  Gradient
+![](Pics/UI.png)  |  ![](Pics/Gradient.gif) 
