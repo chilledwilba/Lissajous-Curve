@@ -2,6 +2,8 @@
 A simple project showing off the Lissajous Curve.<br>
 Play with the sliders and see what patterns you can create.
 
+View the tutorial posted on [Medium](https://medium.com/@wjjordan00/how-to-make-gorgeous-lissajous-patterns-in-unity-easy-2f6423bbe045?source=friends_link&sk=db1b60445838405f7cb81af6e6ea3455)
+
 Built using Unity Version 2018.3.11f1
 
 |     |     |
