@@ -13,7 +13,7 @@ Built using Unity Version 2018.3.11f1
 
 #### Download Build
 Windows Build - [Download](https://github.com/chilledwilba/Lissajous-Curve/releases/download/v1.0/Lissajous-Curve-Windows-V1.zip)<br>
-macOS Build - [Download]()
+macOS Build - [Download](https://github.com/chilledwilba/Lissajous-Curve/releases/download/v1.0/Lissajous-Curve-MacOS-V1.zip)
 
 #### Inspiration
 Making a physical Lissajous curve - [standupmaths](https://youtu.be/4CbPksEl51Q)<br>
